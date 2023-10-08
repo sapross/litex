@@ -5,7 +5,6 @@
 import cva6_wrapper_pkg::*;
 
 module cva6_wrapper #(
-    int UART_DBG             = 0,
     int UART_DBG_CLK_PERIOD  = 50 * 10 ** 6,
     int UART_DBG_BAUD_PERIOD = 3 * 10 ** 6
 ) (
@@ -202,77 +201,56 @@ module cva6_wrapper #(
   // ---------------
   // Debug Module
   // ---------------
-  if (UART_DBG == 0) begin
-    dmi_jtag i_dmi_jtag (
-        .clk_i           (clk_i),
-        .rst_ni          (rst_n),
-        .dmi_rst_no      (),                  // keep open
-        .testmode_i      (test_en),
-        .dmi_req_valid_o (debug_req_valid),
-        .dmi_req_ready_i (debug_req_ready),
-        .dmi_req_o       (debug_req),
-        .dmi_resp_valid_i(debug_resp_valid),
-        .dmi_resp_ready_o(debug_resp_ready),
-        .dmi_resp_i      (debug_resp),
-        .tck_i           (tck),
-        .tms_i           (tms),
-        .trst_ni         (trst_n),
-        .td_i            (tdi),
-        .td_o            (tdo),
-        .tdo_oe_o        (tdo_oe)
-    );
-  end else begin
-    DTM_UART #(
-        .ESC              (uart_pkg::ESC),
-        .CLK_RATE         (UART_DBG_CLK_PERIOD),
-        .BAUD_RATE        (UART_DBG_BAUD_PERIOD),
-        .STB_CONTROL_WIDTH(8),
-        .STB_STATUS_WIDTH (8),
-        .STB_DATA_WIDTH   (32)
-    ) i_uart_dtm (
-        .CLK_I (clk),
-        .RST_NI(cpu_resetn),
-        .RX0_I (debug_rx),
-        .RX1_O (),
-        .TX0_O (debug_tx),
-        .TX1_I (1'b1),
+  DTM_UART #(
+      .ESC              (uart_pkg::ESC),
+      .CLK_RATE         (UART_DBG_CLK_PERIOD),
+      .BAUD_RATE        (UART_DBG_BAUD_PERIOD),
+      .STB_CONTROL_WIDTH(8),
+      .STB_STATUS_WIDTH (8),
+      .STB_DATA_WIDTH   (32)
+  ) i_dtm_uart (
+      .CLK_I (clk_i),
+      .RST_NI(rst_n),
+      .RX0_I (debug_rx),
+      .RX1_O (),
+      .TX0_O (debug_tx),
+      .TX1_I (1'b1),
 
-        .DMI_REQ_READY_I (debug_req_ready),
-        .DMI_REQ_VALID_O (debug_req_valid),
-        .DMI_REQ_O       (debug_req),
-        .DMI_RESP_READY_O(debug_resp_ready),
-        .DMI_RESP_VALID_I(debug_resp_valid),
-        .DMI_RESP_I      (debug_resp),
+      .DMI_REQ_READY_I (debug_req_ready),
+      .DMI_REQ_VALID_O (debug_req_valid),
+      .DMI_REQ_O       (debug_req),
+      .DMI_RESP_READY_O(debug_resp_ready),
+      .DMI_RESP_VALID_I(debug_resp_valid),
+      .DMI_RESP_I      (debug_resp),
 
-        .STB0_STATUS_READY_O (),
-        .STB0_STATUS_VALID_I (1'b0),
-        .STB0_STATUS_I       (1'b0),
-        .STB0_CONTROL_READY_I(1'b0),
-        .STB0_CONTROL_VALID_O(),
-        .STB0_CONTROL_O      (),
+      .STB0_STATUS_READY_O (),
+      .STB0_STATUS_VALID_I (1'b0),
+      .STB0_STATUS_I       (1'b0),
+      .STB0_CONTROL_READY_I(1'b0),
+      .STB0_CONTROL_VALID_O(),
+      .STB0_CONTROL_O      (),
 
-        .STB0_DATA_READY_O(),
-        .STB0_DATA_VALID_I(1'b0),
-        .STB0_DATA_I      (1'b0),
-        .STB0_DATA_READY_I(),
-        .STB0_DATA_VALID_O(),
-        .STB0_DATA_O      (),
+      .STB0_DATA_READY_O(),
+      .STB0_DATA_VALID_I(1'b0),
+      .STB0_DATA_I      (1'b0),
+      .STB0_DATA_READY_I(),
+      .STB0_DATA_VALID_O(),
+      .STB0_DATA_O      (),
 
-        .STB1_STATUS_READY_O (),
-        .STB1_STATUS_VALID_I (1'b0),
-        .STB1_STATUS_I       (1'b0),
-        .STB1_CONTROL_READY_I(1'b0),
-        .STB1_CONTROL_VALID_O(),
-        .STB1_CONTROL_O      (),
+      .STB1_STATUS_READY_O (),
+      .STB1_STATUS_VALID_I (1'b0),
+      .STB1_STATUS_I       (1'b0),
+      .STB1_CONTROL_READY_I(1'b0),
+      .STB1_CONTROL_VALID_O(),
+      .STB1_CONTROL_O      (),
 
-        .STB1_DATA_READY_O(),
-        .STB1_DATA_VALID_I(1'b0),
-        .STB1_DATA_I      (1'b0),
-        .STB1_DATA_READY_I(),
-        .STB1_DATA_VALID_O(),
-        .STB1_DATA_O      ()
-    );
-  end  // else: !ifUART_DEBUG
+      .STB1_DATA_READY_O(),
+      .STB1_DATA_VALID_I(1'b0),
+      .STB1_DATA_I      (1'b0),
+      .STB1_DATA_READY_I(),
+      .STB1_DATA_VALID_O(),
+      .STB1_DATA_O      ()
+  );
 
   ariane_axi::req_t                      dm_axi_m_req;
   ariane_axi::resp_t                     dm_axi_m_resp;

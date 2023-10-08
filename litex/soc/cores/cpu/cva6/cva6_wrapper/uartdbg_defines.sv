@@ -1,0 +1,3 @@
+`define UART_DEBUG
+`define BAUD_RATE = 3000000
+`define CLK_PERIOD = 50000000

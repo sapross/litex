@@ -17,6 +17,9 @@ ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/interface/uart.sv
 ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/interface/uart_rx.sv
 ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/interface/uart_tx.sv
 ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/dmi_uart.sv
+${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/COMMAND_DECODER.sv
+${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/RX_DESERIALIZER.sv
+${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/TX_SERIALIZER.sv
 ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/dmi_uart_tap.sv
 ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/dtm_uart.sv
 ${CVA6_REPO_DIR}/corev_apu/riscv-dbg/src/uart/tap_read_interconnect.sv

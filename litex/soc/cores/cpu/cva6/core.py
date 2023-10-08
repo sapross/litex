@@ -20,7 +20,7 @@ from litex.build.xilinx import XilinxPlatform
 
 # Variants -----------------------------------------------------------------------------------------
 
-CPU_VARIANTS = ["standard", "standard32", "full"]
+CPU_VARIANTS = ["standard", "standard32", "full", "standard32_uartdbg"]
 
 # GCC Flags ----------------------------------------------------------------------------------------
 
@@ -33,7 +33,8 @@ GCC_FLAGS = {
     #                       |||||/-- Double-Precision Floating-Point
     #                       imacfd
     "standard"   : "-march=rv64i2p0_mac -mabi=lp64 ",
-    "standard32" : "-march=rv32imac -mabi=ilp32 ",
+    "standard32" : "-march=rv32imac_zicsr_zifencei -mabi=ilp32 ",
+    "standard32_uartdbg" : "-march=rv32imac_zicsr_zifencei -mabi=ilp32 ",
     "full"       : "-march=rv64gc   -mabi=lp64 ",
 }
 
@@ -79,7 +80,7 @@ class CVA6(CPU):
 
     @property
     def data_width(self):
-        if self.variant == "standard32":
+        if "standard32" in self.variant:
             return 32
         else:
             return 64
@@ -117,6 +118,11 @@ class CVA6(CPU):
 
         # CPU Instance.
         self.cpu_params = dict(
+            # Parameters
+            p_UART_DBG             = 1,
+            p_UART_DBG_CLK_PERIOD  = 50*10**6,
+            p_UART_DBG_BAUD_PERIOD = 3*10**6,
+
             # Clk / Rst.
             i_clk_i       = ClockSignal("sys"),
             i_rst_n       = ~ResetSignal("sys") & ~self.reset,
@@ -179,8 +185,10 @@ class CVA6(CPU):
         # Defines must come first
         wrapper_root = os.path.join(os.path.abspath(os.path.dirname(__file__)), "cva6_wrapper")
         platform.add_source(os.path.join(wrapper_root, "cva6_defines.sv"))
+        if self.variant == "standard32_uartdbg":
+            platform.add_source(os.path.join(wrapper_root, "uartdbg_defines.sv"))
         # TODO: use Flist.cv64a6_imafdc_sv39 and Flist.cv32a6_imac_sv0 instead
-        if self.variant == "standard32":
+        if "standard32" in self.variant:
             manifest = "Flist.cv32a6_imac_sv32"
         else:
             manifest = "Flist.cv64a6_imafdc_sv39"
@@ -204,6 +212,15 @@ class CVA6(CPU):
             i_tms    = self.jtag_tms,
             i_tdi    = self.jtag_tdi,
             o_tdo    = self.jtag_tdo,
+        )
+
+    def add_uart(self, pads):
+        self.uart_rx  = Signal()
+        self.uart_tx = Signal()
+
+        self.cpu_params.update(
+            i_debug_rx    = self.uart_rx,
+            o_debug_tx    = self.uart_tx,
         )
 
     def set_reset_address(self, reset_address):
